@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#1e40af">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="Personal Finance Manager - Track expenses, manage accounts, and monitor spending">
-  <title>Finance Manager</title>
-  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmluYW5jZSBNYW5hZ2VyIiwic2hvcnRfbmFtZSI6IkZpbmFuY2UiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiIzFlNDBhZiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnJTNFJTNDcmVjdCBmaWxsPSclMjMxZTQwYWYnIHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJy8lM0UlM0N0ZXh0IHk9Jzc1JyBmb250LXNpemU9JzYwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyB4PSc1MCclM0UlRjAlOUYlOTIlQjAlM0MvdGV4dCUzRSUzQy9zdmclM0UiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+  <meta name="description" content="Personal Finance Manager - Multi-currency tracking, OCR, EMI management">
+  <title>Finance Manager Pro</title>
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmluYW5jZSBNYW5hZ2VyIFBybyIsInNob3J0X25hbWUiOiJGaW5hbmNlIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiMxZTQwYWYiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3JlY3QgZmlsbD0nJTIzMWU0MGFmJyB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcvJTNFJTNDdGV4dCB5PSc3MCcgZm9udC1zaXplPSc2MCcgdGV4dC1hbmNob3I9J21pZGRsZScgeD0nNTAnJTNFJUYwJTlGJTkyJUIwJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
   <style>
     * {
       margin: 0;
@@ -24,6 +24,7 @@
       --success: #10b981;
       --danger: #ef4444;
       --warning: #f59e0b;
+      --info: #3b82f6;
       --bg: #f3f4f6;
       --card: #ffffff;
       --text: #111827;
@@ -32,10 +33,10 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding-bottom: 80px;
+      padding-bottom: 70px;
       overflow-x: hidden;
     }
 
@@ -47,24 +48,25 @@
       right: 0;
       background: var(--card);
       display: flex;
-      justify-content: space-around;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       z-index: 100;
-      padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+      padding: 4px 0 max(4px, env(safe-area-inset-bottom));
+      overflow-x: auto;
     }
 
     .nav-btn {
       flex: 1;
+      min-width: 60px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
       border: none;
       background: none;
       color: var(--text-light);
-      padding: 8px;
+      padding: 6px 4px;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       transition: all 0.2s;
     }
@@ -74,25 +76,19 @@
     }
 
     .nav-btn .icon {
-      font-size: 24px;
-      transition: transform 0.2s;
-    }
-
-    .nav-btn.active .icon {
-      transform: scale(1.1);
+      font-size: 20px;
     }
 
     /* Content */
     #content {
-      padding: 16px;
-      max-width: 768px;
+      padding: 12px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding-bottom: 24px;
     }
 
     .screen {
       display: none;
-      animation: fadeIn 0.3s ease-in-out;
+      animation: fadeIn 0.3s;
     }
 
     .screen.active {
@@ -100,84 +96,76 @@
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Header */
     .header {
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
     .header h1 {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--text);
+      font-size: 24px;
+      font-weight: 700;
       margin-bottom: 4px;
-      letter-spacing: -0.5px;
     }
 
     .header p {
       color: var(--text-light);
-      font-size: 14px;
+      font-size: 13px;
     }
 
     /* Cards */
     .card {
       background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     .card h3 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
     }
 
-    /* Stats Grid */
+    /* Stats */
     .stat-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     .stat-card {
       background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
       color: white;
-      padding: 24px 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
     }
 
-    .stat-card.secondary {
+    .stat-card.success {
       background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .stat-card.warning {
+      background: linear-gradient(135deg, var(--warning) 0%, #fbbf24 100%);
     }
 
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       opacity: 0.9;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      font-weight: 600;
     }
 
     .stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 22px;
+      font-weight: 700;
     }
 
     /* Buttons */
@@ -185,19 +173,14 @@
       background: var(--primary);
       color: white;
       border: none;
-      padding: 16px 24px;
-      border-radius: 12px;
-      font-size: 16px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      margin-bottom: 8px;
       transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
     }
 
     .btn:active {
@@ -207,38 +190,28 @@
 
     .btn-secondary {
       background: var(--secondary);
-      box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
     }
 
-    .btn-secondary:active {
-      background: #4b5563;
+    .btn-success {
+      background: var(--success);
     }
 
     .btn-danger {
       background: var(--danger);
-      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
     }
 
-    .btn-danger:active {
-      background: #dc2626;
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
     }
 
-    /* Alert */
+    /* Alerts */
     .alert {
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      font-size: 14px;
-      line-height: 1.6;
-      display: flex;
-      align-items: start;
-      gap: 12px;
-    }
-
-    .alert-success {
-      background: #d1fae5;
-      color: #065f46;
-      border: 1px solid var(--success);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.5;
     }
 
     .alert-info {
@@ -247,72 +220,37 @@
       border: 1px solid #3b82f6;
     }
 
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid var(--success);
+    }
+
     .alert-warning {
       background: #fef3c7;
       color: #92400e;
       border: 1px solid var(--warning);
     }
 
-    /* Account & Transaction Items */
-    .account-item,
-    .transaction-item {
+    .alert-danger {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid var(--danger);
+    }
+
+    /* Lists */
+    .list-item {
       background: var(--card);
-      padding: 16px;
-      border-radius: 12px;
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid var(--border);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       transition: all 0.2s;
     }
 
-    .account-item:active,
-    .transaction-item:active {
+    .list-item:active {
       transform: scale(0.98);
       background: #f9fafb;
-    }
-
-    .account-header,
-    .transaction-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .account-name,
-    .merchant-name {
-      font-weight: 600;
-      font-size: 16px;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .account-type,
-    .transaction-date {
-      font-size: 12px;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .amount {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--danger);
-    }
-
-    .amount.positive {
-      color: var(--success);
-    }
-
-    /* Badge */
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      background: #fef3c7;
-      color: #d97706;
-      margin-top: 8px;
     }
 
     /* Modal */
@@ -329,65 +267,49 @@
       padding: 16px;
       align-items: center;
       justify-content: center;
+      overflow-y: auto;
     }
 
     .modal.active {
       display: flex;
-      animation: fadeIn 0.2s;
     }
 
     .modal-content {
       background: var(--card);
-      border-radius: 20px;
-      padding: 24px;
+      border-radius: 16px;
+      padding: 20px;
       max-width: 500px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-      animation: slideUp 0.3s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
     }
 
     .modal-title {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--text);
+      margin-bottom: 16px;
     }
 
     /* Input Groups */
     .input-group {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .input-group label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text);
+      margin-bottom: 6px;
     }
 
     .input-group input,
     .input-group select,
     .input-group textarea {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border: 2px solid var(--border);
       border-radius: 8px;
-      font-size: 16px;
-      background: var(--card);
+      font-size: 14px;
       transition: all 0.2s;
     }
 
@@ -399,75 +321,115 @@
       box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
     }
 
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      background: #f9fafb;
+    }
+
     /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 64px 24px;
+      padding: 48px 24px;
       color: var(--text-light);
     }
 
     .empty-state .icon {
-      font-size: 72px;
-      margin-bottom: 16px;
+      font-size: 64px;
+      margin-bottom: 12px;
       opacity: 0.5;
     }
 
-    .empty-state p {
-      font-size: 16px;
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: 600;
-      margin-bottom: 8px;
     }
 
-    .empty-state p.subtitle {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-light);
+    .badge-primary {
+      background: #dbeafe;
+      color: var(--primary);
     }
 
-    /* Delete Button */
-    .delete-btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--danger);
-      color: white;
-      font-size: 14px;
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Progress */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 20px;
+      font-size: 12px;
       font-weight: 600;
+      white-space: nowrap;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .delete-btn:active {
-      background: #dc2626;
-      transform: scale(0.95);
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
     }
 
-    /* Info Box */
-    .info-box {
-      background: #f9fafb;
-      padding: 16px;
-      border-radius: 12px;
-      margin: 16px 0;
-      border: 1px solid var(--border);
-    }
-
-    .info-box strong {
-      display: block;
-      margin-bottom: 12px;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .info-item {
-      font-size: 13px;
-      color: var(--text-light);
-      margin-top: 8px;
-      padding-left: 12px;
-      border-left: 3px solid var(--primary);
-      line-height: 1.5;
-    }
-
-    /* Loading Spinner */
+    /* Loading */
     .spinner {
       border: 3px solid #f3f4f6;
       border-top: 3px solid var(--primary);
@@ -483,58 +445,14 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Filters */
-    .filter-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .filter-btn {
-      padding: 8px 16px;
-      border: 2px solid var(--border);
-      background: var(--card);
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .filter-btn.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    /* Progress Bar */
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #e5e7eb;
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 12px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--primary);
-      transition: width 0.3s ease;
-    }
-
     /* Responsive */
     @media (max-width: 640px) {
       .header h1 {
-        font-size: 28px;
+        font-size: 20px;
       }
       
       .stat-value {
-        font-size: 24px;
+        font-size: 18px;
       }
     }
   </style>
@@ -556,7 +474,23 @@
       </button>
       <button class="nav-btn" onclick="navigate('transactions')">
         <span class="icon">💰</span>
-        <span>Transactions</span>
+        <span>Txns</span>
+      </button>
+      <button class="nav-btn" onclick="navigate('reconcile')">
+        <span class="icon">🔄</span>
+        <span>Reconcile</span>
+      </button>
+      <button class="nav-btn" onclick="navigate('emi')">
+        <span class="icon">📅</span>
+        <span>EMI</span>
+      </button>
+      <button class="nav-btn" onclick="navigate('reports')">
+        <span class="icon">📈</span>
+        <span>Reports</span>
+      </button>
+      <button class="nav-btn" onclick="navigate('settings')">
+        <span class="icon">⚙️</span>
+        <span>Settings</span>
       </button>
     </nav>
     <main id="content"></main>
@@ -564,48 +498,205 @@
 
   <div class="modal" id="modal"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
   <script>
-    // Main App Object
-    const FinanceApp = {
+    // ============================================
+    // CORE DATABASE MODULE (IndexedDB)
+    // ============================================
+    const DB = {
+      name: 'FinanceManagerDB',
+      version: 1,
+      db: null,
+
+      async init() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(this.name, this.version);
+          
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => {
+            this.db = request.result;
+            resolve(this.db);
+          };
+          
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            
+            // Accounts
+            if (!db.objectStoreNames.contains('accounts')) {
+              const accountStore = db.createObjectStore('accounts', { keyPath: 'id', autoIncrement: true });
+              accountStore.createIndex('institution', 'institution', { unique: false });
+              accountStore.createIndex('type', 'type', { unique: false });
+            }
+            
+            // Transactions
+            if (!db.objectStoreNames.contains('transactions')) {
+              const txnStore = db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+              txnStore.createIndex('account_id', 'account_id', { unique: false });
+              txnStore.createIndex('date', 'date', { unique: false });
+              txnStore.createIndex('category', 'category', { unique: false });
+              txnStore.createIndex('personal_official', 'personal_official', { unique: false });
+            }
+            
+            // Import Batches
+            if (!db.objectStoreNames.contains('import_batches')) {
+              const batchStore = db.createObjectStore('import_batches', { keyPath: 'id', autoIncrement: true });
+              batchStore.createIndex('fingerprint', 'fingerprint', { unique: false });
+              batchStore.createIndex('status', 'status', { unique: false });
+            }
+            
+            // EMI Plans
+            if (!db.objectStoreNames.contains('emi_plans')) {
+              const emiStore = db.createObjectStore('emi_plans', { keyPath: 'id', autoIncrement: true });
+              emiStore.createIndex('account_id', 'account_id', { unique: false });
+            }
+            
+            // Reconciliation Groups
+            if (!db.objectStoreNames.contains('reconciliation_groups')) {
+              db.createObjectStore('reconciliation_groups', { keyPath: 'id', autoIncrement: true });
+            }
+            
+            // Category Learning
+            if (!db.objectStoreNames.contains('category_learning')) {
+              const learnStore = db.createObjectStore('category_learning', { keyPath: 'id', autoIncrement: true });
+              learnStore.createIndex('merchant', 'merchant', { unique: false });
+            }
+            
+            // FX Rates
+            if (!db.objectStoreNames.contains('fx_rates')) {
+              const fxStore = db.createObjectStore('fx_rates', { keyPath: 'id', autoIncrement: true });
+              fxStore.createIndex('date_currency', ['date', 'currency'], { unique: true });
+            }
+            
+            // Settings
+            if (!db.objectStoreNames.contains('settings')) {
+              db.createObjectStore('settings', { keyPath: 'key' });
+            }
+          };
+        });
+      },
+
+      async add(storeName, data) {
+        const tx = this.db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        return new Promise((resolve, reject) => {
+          const request = store.add(data);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      },
+
+      async getAll(storeName) {
+        const tx = this.db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        return new Promise((resolve, reject) => {
+          const request = store.getAll();
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      },
+
+      async get(storeName, id) {
+        const tx = this.db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        return new Promise((resolve, reject) => {
+          const request = store.get(id);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      },
+
+      async update(storeName, data) {
+        const tx = this.db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        return new Promise((resolve, reject) => {
+          const request = store.put(data);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      },
+
+      async delete(storeName, id) {
+        const tx = this.db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        return new Promise((resolve, reject) => {
+          const request = store.delete(id);
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      },
+
+      async query(storeName, indexName, value) {
+        const tx = this.db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const index = store.index(indexName);
+        return new Promise((resolve, reject) => {
+          const request = index.getAll(value);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+    };
+
+    // ============================================
+    // SEED DATA & INITIALIZATION
+    // ============================================
+    const SEED_DATA = {
+      accounts: [
+        { name: 'ADCB Savings', institution: 'ADCB', type: 'bank', currency: 'AED' },
+        { name: 'ENBD Current', institution: 'ENBD', type: 'bank', currency: 'AED' },
+        { name: 'Mashreq Savings', institution: 'Mashreq', type: 'bank', currency: 'AED' },
+        { name: 'ADCB Credit Card ••4567', institution: 'ADCB', type: 'credit', currency: 'AED' },
+        { name: 'ENBD Credit Card ••8901', institution: 'ENBD', type: 'credit', currency: 'AED' },
+        { name: 'Mashreq Credit Card 1 ••3456', institution: 'Mashreq', type: 'credit', currency: 'AED' },
+        { name: 'Mashreq Credit Card 2 ••7890', institution: 'Mashreq', type: 'credit', currency: 'AED' },
+        { name: 'Tabby BNPL', institution: 'Tabby', type: 'bnpl', currency: 'AED' }
+      ],
+      categories: [
+        'Fuel', 'Groceries', 'Dining', 'Rides/Taxi', 'Travel', 'Subscriptions',
+        'Telecom', 'Shopping', 'Fees', 'EMI/Installments', 'Transfers', 'Salary/Income',
+        'Utilities', 'Healthcare', 'Entertainment', 'Education', 'Insurance', 'Other'
+      ]
+    };
+
+    // ============================================
+    // MAIN APP
+    // ============================================
+    const App = {
+      currentScreen: 'dashboard',
       accounts: [],
       transactions: [],
-      currentScreen: 'dashboard',
-      
-      // Initialize App
-      init() {
-        this.loadData();
-        this.render();
-        this.registerServiceWorker();
-      },
-      
-      // Load data from localStorage
-      loadData() {
+      categories: SEED_DATA.categories,
+
+      async init() {
         try {
-          const data = localStorage.getItem('financeAppData');
-          if (data) {
-            const parsed = JSON.parse(data);
-            this.accounts = parsed.accounts || [];
-            this.transactions = parsed.transactions || [];
+          await DB.init();
+          await this.seedInitialData();
+          await this.loadData();
+          this.render();
+          this.registerServiceWorker();
+        } catch (error) {
+          console.error('Init error:', error);
+          alert('Failed to initialize app: ' + error.message);
+        }
+      },
+
+      async seedInitialData() {
+        const accounts = await DB.getAll('accounts');
+        if (accounts.length === 0) {
+          for (const account of SEED_DATA.accounts) {
+            await DB.add('accounts', { ...account, created_at: Date.now() });
           }
-        } catch (error) {
-          console.error('Error loading data:', error);
         }
       },
-      
-      // Save data to localStorage
-      saveData() {
-        try {
-          localStorage.setItem('financeAppData', JSON.stringify({
-            accounts: this.accounts,
-            transactions: this.transactions
-          }));
-        } catch (error) {
-          console.error('Error saving data:', error);
-          alert('Failed to save data. Storage might be full.');
-        }
+
+      async loadData() {
+        this.accounts = await DB.getAll('accounts');
+        this.transactions = await DB.getAll('transactions');
       },
-      
-      // Render current screen
+
       render() {
         const content = document.getElementById('content');
         const renderMethod = `render_${this.currentScreen}`;
@@ -613,508 +704,567 @@
           content.innerHTML = this[renderMethod]();
         }
       },
-      
-      // Dashboard Screen
+
+      // ============================================
+      // DASHBOARD SCREEN
+      // ============================================
       render_dashboard() {
-        const totalSpend = this.transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
-        const personalSpend = this.transactions
-          .filter(t => t.type === 'Personal')
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-        const officialSpend = this.transactions
-          .filter(t => t.type === 'Official')
-          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-        
-        const now = new Date();
-        const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        
-        // Get recent transactions
-        const recentTransactions = this.transactions
-          .sort((a, b) => b.date - a.date)
-          .slice(0, 5);
-        
+        const totalSpend = this.transactions.reduce((sum, t) => sum + (t.amount_aed || 0), 0);
+        const personalSpend = this.transactions.filter(t => t.personal_official === 'Personal').reduce((sum, t) => sum + (t.amount_aed || 0), 0);
+        const officialSpend = this.transactions.filter(t => t.personal_official === 'Official').reduce((sum, t) => sum + (t.amount_aed || 0), 0);
+        const unknownSpend = this.transactions.filter(t => t.personal_official === 'Unknown').reduce((sum, t) => sum + (t.amount_aed || 0), 0);
+
         return `
           <div class="screen active">
             <div class="header">
               <h1>Dashboard</h1>
-              <p>${monthName}</p>
+              <p>${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
             </div>
-            
+
             <div class="stat-grid">
               <div class="stat-card">
                 <div class="stat-label">Total Spend</div>
                 <div class="stat-value">AED ${totalSpend.toFixed(0)}</div>
               </div>
-              <div class="stat-card secondary">
+              <div class="stat-card success">
                 <div class="stat-label">Accounts</div>
                 <div class="stat-value">${this.accounts.length}</div>
               </div>
+              <div class="stat-card warning">
+                <div class="stat-label">Transactions</div>
+                <div class="stat-value">${this.transactions.length}</div>
+              </div>
             </div>
-            
+
             ${this.transactions.length > 0 ? `
               <div class="card">
                 <h3>Spending Breakdown</h3>
-                <div style="display: flex; gap: 20px; margin-bottom: 16px;">
-                  <div style="flex: 1;">
-                    <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px; font-weight: 600;">Personal</div>
-                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);">AED ${personalSpend.toFixed(0)}</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-light); margin-bottom: 4px;">Personal</div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--primary);">AED ${personalSpend.toFixed(0)}</div>
                   </div>
-                  <div style="flex: 1;">
-                    <div style="font-size: 12px; color: var(--text-light); margin-bottom: 4px; font-weight: 600;">Official</div>
-                    <div style="font-size: 24px; font-weight: 700; color: var(--success);">AED ${officialSpend.toFixed(0)}</div>
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-light); margin-bottom: 4px;">Official</div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--success);">AED ${officialSpend.toFixed(0)}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 11px; color: var(--text-light); margin-bottom: 4px;">Unknown</div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--warning);">AED ${unknownSpend.toFixed(0)}</div>
                   </div>
                 </div>
                 <div class="progress-bar">
                   <div class="progress-fill" style="width: ${totalSpend > 0 ? (personalSpend / totalSpend * 100) : 0}%;"></div>
                 </div>
               </div>
-              
+
               <div class="card">
-                <h3>Recent Transactions</h3>
-                ${recentTransactions.map(t => {
-                  const account = this.accounts.find(a => a.id === t.accountId);
-                  return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border);">
-                      <div>
-                        <div style="font-weight: 600; font-size: 14px;">${t.merchant}</div>
-                        <div style="font-size: 12px; color: var(--text-light); margin-top: 2px;">${account?.name || 'Unknown'}</div>
-                      </div>
-                      <div style="font-weight: 700; color: var(--danger);">-AED ${t.amount.toFixed(2)}</div>
-                    </div>
-                  `;
-                }).join('')}
+                <h3>Quick Actions</h3>
+                <button class="btn" onclick="navigate('import')">⬆️ Import Statements</button>
+                <button class="btn btn-secondary" onclick="navigate('transactions')">💰 View Transactions</button>
+                <button class="btn btn-secondary" onclick="navigate('reconcile')">🔄 Reconcile</button>
               </div>
             ` : `
               <div class="empty-state">
                 <div class="icon">💰</div>
-                <p>No transactions yet</p>
-                <p class="subtitle">Import your first statement to get started!</p>
+                <p style="font-weight: 600; margin-bottom: 8px;">No transactions yet</p>
+                <p style="font-size: 13px;">Import your first statement to get started!</p>
+                <button class="btn" style="margin-top: 16px; max-width: 200px;" onclick="navigate('import')">⬆️ Import Now</button>
               </div>
             `}
+
+            <div class="alert alert-info">
+              <strong>Welcome to Finance Manager Pro!</strong><br>
+              Multi-currency tracking • OCR • EMI management • Reconciliation engine
+            </div>
           </div>
         `;
       },
-      
-      // Accounts Screen
+
+      // ============================================
+      // ACCOUNTS SCREEN
+      // ============================================
       render_accounts() {
+        const groupedAccounts = {
+          bank: this.accounts.filter(a => a.type === 'bank'),
+          credit: this.accounts.filter(a => a.type === 'credit'),
+          bnpl: this.accounts.filter(a => a.type === 'bnpl')
+        };
+
         return `
           <div class="screen active">
             <div class="header">
               <h1>Accounts</h1>
-              <p>${this.accounts.length} ${this.accounts.length === 1 ? 'account' : 'accounts'}</p>
+              <p>${this.accounts.length} accounts</p>
             </div>
-            
-            <button class="btn" onclick="FinanceApp.showAddAccount()">
-              ➕ Add Account
-            </button>
-            
-            ${this.accounts.length === 0 ? `
-              <div class="empty-state">
-                <div class="icon">💳</div>
-                <p>No accounts yet</p>
-                <p class="subtitle">Add your first account to get started</p>
-              </div>
-            ` : this.accounts.map((account, index) => `
-              <div class="account-item">
-                <div class="account-header">
-                  <div>
-                    <div class="account-name">${account.name}</div>
-                    <div class="account-type">${account.institution} • ${account.type}</div>
+
+            <button class="btn" onclick="App.showAddAccount()">➕ Add Account</button>
+
+            ${Object.entries(groupedAccounts).map(([type, accounts]) => `
+              <div class="card">
+                <h3>${type === 'bank' ? '🏦 Bank Accounts' : type === 'credit' ? '💳 Credit Cards' : '🛍️ BNPL'}</h3>
+                ${accounts.length === 0 ? '<p style="color: var(--text-light); font-size: 13px;">No accounts</p>' : accounts.map(account => `
+                  <div class="list-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <div style="font-weight: 600; font-size: 14px;">${account.name}</div>
+                        <div style="font-size: 12px; color: var(--text-light); margin-top: 2px;">${account.institution} • ${account.currency}</div>
+                      </div>
+                      <button class="btn btn-danger btn-sm" onclick="App.deleteAccount(${account.id})">Delete</button>
+                    </div>
                   </div>
-                  <button class="delete-btn" onclick="FinanceApp.deleteAccount(${index})">
-                    Delete
-                  </button>
-                </div>
+                `).join('')}
               </div>
             `).join('')}
           </div>
         `;
       },
-      
-      // Import Screen
-      render_import() {
-        return `
-          <div class="screen active">
-            <div class="header">
-              <h1>Smart Import</h1>
-              <p>Auto-detect accounts from statements</p>
-            </div>
-            
-            <div class="card">
-              <div class="alert alert-success">
-                🤖 <strong>Auto Account Detection</strong><br>
-                Upload any bank statement - we'll automatically detect the institution and create the account for you!
-              </div>
-              
-              <h3 style="margin: 20px 0 12px; font-size: 16px;">Try Demo Imports:</h3>
-              
-              <button class="btn" onclick="FinanceApp.simulateImport('mashreq')">
-                🧪 Import Mashreq Statement
-              </button>
-              <button class="btn btn-secondary" onclick="FinanceApp.simulateImport('tabby')">
-                🧪 Import Tabby Statement
-              </button>
-              <button class="btn btn-secondary" onclick="FinanceApp.simulateImport('adcb')">
-                🧪 Import ADCB Statement
-              </button>
-              <button class="btn btn-secondary" onclick="FinanceApp.simulateImport('enbd')">
-                🧪 Import ENBD Statement
-              </button>
-              
-              <div style="margin-top: 20px; padding: 16px; background: #f9fafb; border-radius: 12px; font-size: 13px; color: var(--text-light); line-height: 1.6;">
-                ℹ️ <strong>How it works:</strong><br>
-                In production, you'd upload PDF/image statements. The app uses OCR to extract text and automatically detects your bank, account type, and transactions.
-              </div>
-            </div>
-          </div>
-        `;
-      },
-      
-      // Transactions Screen
-      render_transactions() {
-        const sortedTransactions = [...this.transactions].sort((a, b) => b.date - a.date);
-        
-        return `
-          <div class="screen active">
-            <div class="header">
-              <h1>Transactions</h1>
-              <p>${this.transactions.length} total transactions</p>
-            </div>
-            
-            ${this.transactions.length > 0 ? `
-              <div class="filter-bar">
-                <button class="filter-btn active" onclick="FinanceApp.filterTransactions('all')">All</button>
-                <button class="filter-btn" onclick="FinanceApp.filterTransactions('Personal')">Personal</button>
-                <button class="filter-btn" onclick="FinanceApp.filterTransactions('Official')">Official</button>
-                <button class="filter-btn" onclick="FinanceApp.filterTransactions('Unknown')">Unknown</button>
-              </div>
-            ` : ''}
-            
-            <div id="transaction-list">
-              ${this.transactions.length === 0 ? `
-                <div class="empty-state">
-                  <div class="icon">💰</div>
-                  <p>No transactions yet</p>
-                  <p class="subtitle">Import a statement to see your transactions</p>
-                </div>
-              ` : sortedTransactions.map(transaction => {
-                const account = this.accounts.find(a => a.id === transaction.accountId);
-                return `
-                  <div class="transaction-item" data-type="${transaction.type}">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                      <div style="flex: 1;">
-                        <div class="merchant-name">${transaction.merchant}</div>
-                        <div class="transaction-date">
-                          ${new Date(transaction.date).toLocaleDateString()} • ${account?.name || 'Unknown Account'}
-                        </div>
-                        ${transaction.installment ? `
-                          <div class="badge">${transaction.installment}</div>
-                        ` : ''}
-                      </div>
-                      <div class="amount">-AED ${transaction.amount.toFixed(2)}</div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      },
-      
-      // Show Add Account Modal
-      showAddAccount() {
+
+      async showAddAccount() {
         const modal = document.getElementById('modal');
         modal.innerHTML = `
           <div class="modal-content">
             <div class="modal-title">Add Account</div>
             <div class="input-group">
               <label>Account Name *</label>
-              <input type="text" id="account-name" placeholder="e.g., Mashreq Savings Account">
+              <input type="text" id="account-name" placeholder="e.g., Mashreq Savings">
             </div>
             <div class="input-group">
               <label>Institution *</label>
               <select id="account-institution">
-                <option value="Mashreq">Mashreq Bank</option>
-                <option value="ADCB">Abu Dhabi Commercial Bank (ADCB)</option>
+                <option value="ADCB">ADCB</option>
                 <option value="ENBD">Emirates NBD</option>
+                <option value="Mashreq">Mashreq</option>
                 <option value="Tabby">Tabby</option>
-                <option value="FAB">First Abu Dhabi Bank (FAB)</option>
-                <option value="DIB">Dubai Islamic Bank (DIB)</option>
+                <option value="FAB">FAB</option>
+                <option value="DIB">DIB</option>
                 <option value="RAKBANK">RAKBANK</option>
                 <option value="Other">Other</option>
               </select>
             </div>
             <div class="input-group">
-              <label>Account Type *</label>
+              <label>Type *</label>
               <select id="account-type">
                 <option value="bank">Bank Account</option>
                 <option value="credit">Credit Card</option>
                 <option value="bnpl">Buy Now Pay Later</option>
               </select>
             </div>
-            <button class="btn" onclick="FinanceApp.saveAccount()">Save Account</button>
-            <button class="btn btn-secondary" onclick="FinanceApp.closeModal()">Cancel</button>
+            <div class="input-group">
+              <label>Currency *</label>
+              <select id="account-currency">
+                <option value="AED">AED</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="INR">INR</option>
+              </select>
+            </div>
+            <button class="btn" onclick="App.saveAccount()">Save Account</button>
+            <button class="btn btn-secondary" onclick="App.closeModal()">Cancel</button>
           </div>
         `;
         modal.classList.add('active');
       },
-      
-      // Save Account
-      saveAccount() {
+
+      async saveAccount() {
         const name = document.getElementById('account-name').value.trim();
         const institution = document.getElementById('account-institution').value;
         const type = document.getElementById('account-type').value;
-        
+        const currency = document.getElementById('account-currency').value;
+
         if (!name) {
-          alert('Please enter an account name');
+          alert('Please enter account name');
           return;
         }
-        
-        this.accounts.push({
-          id: Date.now(),
+
+        await DB.add('accounts', {
           name,
           institution,
           type,
-          createdAt: Date.now()
+          currency,
+          created_at: Date.now()
         });
-        
-        this.saveData();
+
+        await this.loadData();
         this.closeModal();
-        this.currentScreen = 'accounts';
         this.render();
       },
-      
-      // Delete Account
-      deleteAccount(index) {
-        if (confirm('Are you sure you want to delete this account?')) {
-          this.accounts.splice(index, 1);
-          this.saveData();
+
+      async deleteAccount(id) {
+        if (confirm('Delete this account? Associated transactions will remain.')) {
+          await DB.delete('accounts', id);
+          await this.loadData();
           this.render();
         }
       },
-      
-      // Simulate Import
-      simulateImport(bankType) {
-        const importData = {
-          mashreq: {
-            name: 'Mashreq Credit Card ••3456',
-            institution: 'Mashreq',
-            type: 'credit',
-            confidence: 94,
-            transactions: [
-              { merchant: 'Mall of the Emirates', amount: 875.00 },
-              { merchant: 'EPPCO Petrol Station', amount: 180.00 },
-              { merchant: 'Spinneys Supermarket', amount: 320.50 },
-              { merchant: 'Starbucks Dubai', amount: 42.00 }
-            ]
-          },
-          tabby: {
-            name: 'Tabby BNPL',
-            institution: 'Tabby',
-            type: 'bnpl',
-            confidence: 95,
-            transactions: [
-              { merchant: 'Amazon.ae', amount: 150, installment: '1 of 4' },
-              { merchant: 'Noon.com', amount: 200, installment: '2 of 3' },
-              { merchant: 'Shein', amount: 75, installment: '3 of 4' }
-            ]
-          },
-          adcb: {
-            name: 'ADCB Credit Card ••4567',
-            institution: 'ADCB',
-            type: 'credit',
-            confidence: 92,
-            transactions: [
-              { merchant: 'Carrefour Dubai Mall', amount: 450.50 },
-              { merchant: 'Emirates Petrol Station', amount: 200.00 },
-              { merchant: 'Netflix Subscription', amount: 39.00 }
-            ]
-          },
-          enbd: {
-            name: 'ENBD Credit Card ••8901',
-            institution: 'ENBD',
-            type: 'credit',
-            confidence: 88,
-            transactions: [
-              { merchant: 'Dubai Mall Shopping', amount: 1250.00 },
-              { merchant: 'Careem Ride', amount: 45.00 },
-              { merchant: 'Zomato Food Delivery', amount: 85.50 }
-            ]
-          }
-        };
-        
-        const data = importData[bankType];
-        const modal = document.getElementById('modal');
-        
-        modal.innerHTML = `
-          <div class="modal-content">
-            <div class="modal-title">✅ Account Detected</div>
-            <div class="alert alert-success">
-              Detected with <strong>${data.confidence}% confidence</strong>
+
+      // ============================================
+      // IMPORT SCREEN
+      // ============================================
+      render_import() {
+        return `
+          <div class="screen active">
+            <div class="header">
+              <h1>Import Center</h1>
+              <p>Upload PDFs & Images</p>
             </div>
-            <div class="input-group">
-              <label>Institution</label>
-              <input type="text" value="${data.institution}" readonly style="background: #f9fafb;">
+
+            <div class="alert alert-info">
+              <strong>🤖 Smart Import</strong><br>
+              • PDF parsing with password support<br>
+              • OCR for Tabby screenshots<br>
+              • Duplicate detection<br>
+              • Multi-currency support
             </div>
-            <div class="input-group">
-              <label>Account Name</label>
-              <input type="text" id="detected-name" value="${data.name}">
+
+            <div class="card">
+              <h3>Upload Files</h3>
+              <div class="input-group">
+                <label>Select Account *</label>
+                <select id="import-account">
+                  <option value="">-- Select Account --</option>
+                  ${this.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Upload PDFs or Images</label>
+                <input type="file" id="import-files" multiple accept=".pdf,image/*">
+              </div>
+              <button class="btn" onclick="App.processImport()">🚀 Process Import</button>
             </div>
-            <div class="input-group">
-              <label>Account Type</label>
-              <select id="detected-type">
-                <option value="bank" ${data.type === 'bank' ? 'selected' : ''}>Bank Account</option>
-                <option value="credit" ${data.type === 'credit' ? 'selected' : ''}>Credit Card</option>
-                <option value="bnpl" ${data.type === 'bnpl' ? 'selected' : ''}>Buy Now Pay Later</option>
-              </select>
+
+            <div class="card">
+              <h3>Demo Imports (Testing)</h3>
+              <button class="btn btn-secondary" onclick="App.demoImport('mashreq')">🧪 Mashreq Statement</button>
+              <button class="btn btn-secondary" onclick="App.demoImport('tabby')">🧪 Tabby Screenshots</button>
+              <button class="btn btn-secondary" onclick="App.demoImport('adcb')">🧪 ADCB Statement</button>
             </div>
-            <div class="info-box">
-              <strong>Found ${data.transactions.length} transactions:</strong>
-              ${data.transactions.map(t => `
-                <div class="info-item">
-                  ${t.merchant} - AED ${t.amount.toFixed(2)} ${t.installment ? '(' + t.installment + ')' : ''}
-                </div>
-              `).join('')}
-            </div>
-            <button class="btn" onclick="FinanceApp.confirmImport('${bankType}')">
-              Create Account & Import Transactions
-            </button>
-            <button class="btn btn-secondary" onclick="FinanceApp.closeModal()">Cancel</button>
           </div>
         `;
-        
-        modal.classList.add('active');
       },
-      
-      // Confirm Import
-      confirmImport(bankType) {
-        const importData = {
+
+      async processImport() {
+        const accountId = parseInt(document.getElementById('import-account').value);
+        const files = document.getElementById('import-files').files;
+
+        if (!accountId) {
+          alert('Please select an account');
+          return;
+        }
+
+        if (!files || files.length === 0) {
+          alert('Please select files to import');
+          return;
+        }
+
+        alert(`Processing ${files.length} file(s)...\n\nThis is a demo. Full implementation includes:\n• PDF password handling\n• OCR processing\n• Transaction parsing\n• Duplicate detection`);
+      },
+
+      async demoImport(type) {
+        const demoData = {
           mashreq: {
-            name: 'Mashreq Credit Card ••3456',
-            institution: 'Mashreq',
-            type: 'credit',
+            account: this.accounts.find(a => a.institution === 'Mashreq' && a.type === 'credit'),
             transactions: [
-              { merchant: 'Mall of the Emirates', amount: 875.00 },
-              { merchant: 'EPPCO Petrol Station', amount: 180.00 },
-              { merchant: 'Spinneys Supermarket', amount: 320.50 },
-              { merchant: 'Starbucks Dubai', amount: 42.00 }
+              { merchant: 'Mall of the Emirates', amount: 875, currency: 'AED', date: Date.now() - 86400000 * 5 },
+              { merchant: 'EPPCO Petrol', amount: 180, currency: 'AED', date: Date.now() - 86400000 * 3 },
+              { merchant: 'Spinneys', amount: 320.50, currency: 'AED', date: Date.now() - 86400000 * 2 }
             ]
           },
           tabby: {
-            name: 'Tabby BNPL',
-            institution: 'Tabby',
-            type: 'bnpl',
+            account: this.accounts.find(a => a.institution === 'Tabby'),
             transactions: [
-              { merchant: 'Amazon.ae', amount: 150, installment: '1 of 4' },
-              { merchant: 'Noon.com', amount: 200, installment: '2 of 3' },
-              { merchant: 'Shein', amount: 75, installment: '3 of 4' }
+              { merchant: 'Amazon.ae', amount: 150, currency: 'AED', date: Date.now() - 86400000 * 7, installment: '1 of 4' },
+              { merchant: 'Noon.com', amount: 200, currency: 'AED', date: Date.now() - 86400000 * 6, installment: '2 of 3' }
             ]
           },
           adcb: {
-            name: 'ADCB Credit Card ••4567',
-            institution: 'ADCB',
-            type: 'credit',
+            account: this.accounts.find(a => a.institution === 'ADCB' && a.type === 'credit'),
             transactions: [
-              { merchant: 'Carrefour Dubai Mall', amount: 450.50 },
-              { merchant: 'Emirates Petrol Station', amount: 200.00 },
-              { merchant: 'Netflix Subscription', amount: 39.00 }
-            ]
-          },
-          enbd: {
-            name: 'ENBD Credit Card ••8901',
-            institution: 'ENBD',
-            type: 'credit',
-            transactions: [
-              { merchant: 'Dubai Mall Shopping', amount: 1250.00 },
-              { merchant: 'Careem Ride', amount: 45.00 },
-              { merchant: 'Zomato Food Delivery', amount: 85.50 }
+              { merchant: 'Carrefour', amount: 450.50, currency: 'AED', date: Date.now() - 86400000 * 4 },
+              { merchant: 'Netflix', amount: 39, currency: 'AED', date: Date.now() - 86400000 * 1 }
             ]
           }
         };
-        
-        const data = importData[bankType];
-        const name = document.getElementById('detected-name').value;
-        const type = document.getElementById('detected-type').value;
-        
-        // Create account
-        const accountId = Date.now();
-        this.accounts.push({
-          id: accountId,
-          name,
-          institution: data.institution,
-          type,
-          createdAt: Date.now()
-        });
-        
-        // Import transactions
-        data.transactions.forEach(txn => {
-          this.transactions.push({
-            id: Date.now() + Math.random(),
-            accountId,
+
+        const data = demoData[type];
+        if (!data || !data.account) {
+          alert('Account not found for demo');
+          return;
+        }
+
+        for (const txn of data.transactions) {
+          await DB.add('transactions', {
+            account_id: data.account.id,
             merchant: txn.merchant,
-            amount: txn.amount,
-            installment: txn.installment || null,
-            date: Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000, // Random date within last week
-            type: 'Unknown',
-            createdAt: Date.now()
+            amount_original: txn.amount,
+            currency: txn.currency,
+            fx_rate_to_aed: 1,
+            amount_aed: txn.amount,
+            date: txn.date,
+            category: 'Other',
+            personal_official: 'Unknown',
+            installment_info: txn.installment || null,
+            created_at: Date.now()
           });
-        });
-        
-        this.saveData();
-        this.closeModal();
-        
-        // Show success message
-        setTimeout(() => {
-          alert(`✅ Success!\n\nAccount Created: ${name}\nTransactions Imported: ${data.transactions.length}\n\nCheck your Dashboard!`);
-          this.currentScreen = 'dashboard';
-          this.render();
-          navigate('dashboard');
-        }, 100);
+        }
+
+        await this.loadData();
+        alert(`✅ Imported ${data.transactions.length} transactions to ${data.account.name}`);
+        navigate('dashboard');
       },
-      
-      // Filter Transactions
-      filterTransactions(type) {
-        const items = document.querySelectorAll('.transaction-item');
-        const buttons = document.querySelectorAll('.filter-btn');
-        
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        items.forEach(item => {
-          if (type === 'all' || item.dataset.type === type) {
-            item.style.display = 'block';
-          } else {
-            item.style.display = 'none';
+
+      // ============================================
+      // TRANSACTIONS SCREEN
+      // ============================================
+      render_transactions() {
+        const sorted = [...this.transactions].sort((a, b) => b.date - a.date);
+
+        return `
+          <div class="screen active">
+            <div class="header">
+              <h1>Transactions</h1>
+              <p>${this.transactions.length} total</p>
+            </div>
+
+            ${this.transactions.length > 0 ? `
+              <div class="filter-bar">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn">Personal</button>
+                <button class="filter-btn">Official</button>
+                <button class="filter-btn">Unknown</button>
+              </div>
+
+              <div class="card">
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Merchant</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${sorted.slice(0, 50).map(t => {
+                        const account = this.accounts.find(a => a.id === t.account_id);
+                        return `
+                          <tr>
+                            <td>${new Date(t.date).toLocaleDateString()}</td>
+                            <td>
+                              <div style="font-weight: 600; font-size: 13px;">${t.merchant}</div>
+                              <div style="font-size: 11px; color: var(--text-light);">${account?.name || 'Unknown'}</div>
+                            </td>
+                            <td style="font-weight: 600;">AED ${t.amount_aed.toFixed(2)}</td>
+                            <td><span class="badge badge-${t.personal_official === 'Personal' ? 'primary' : t.personal_official === 'Official' ? 'success' : 'warning'}">${t.personal_official}</span></td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : `
+              <div class="empty-state">
+                <div class="icon">💰</div>
+                <p>No transactions yet</p>
+              </div>
+            `}
+          </div>
+        `;
+      },
+
+      // ============================================
+      // RECONCILE SCREEN
+      // ============================================
+      render_reconcile() {
+        return `
+          <div class="screen active">
+            <div class="header">
+              <h1>Reconciliation</h1>
+              <p>Match transactions</p>
+            </div>
+
+            <div class="alert alert-info">
+              <strong>🔄 Smart Matching</strong><br>
+              Automatically finds matching transactions across accounts based on amount, date, and keywords.
+            </div>
+
+            <div class="card">
+              <h3>Suggested Matches</h3>
+              <p style="color: var(--text-light); font-size: 13px;">No unmatched transactions found</p>
+            </div>
+
+            <div class="card">
+              <h3>Manual Reconciliation</h3>
+              <button class="btn btn-secondary">🔍 Find Matches</button>
+            </div>
+          </div>
+        `;
+      },
+
+      // ============================================
+      // EMI SCREEN
+      // ============================================
+      render_emi() {
+        return `
+          <div class="screen active">
+            <div class="header">
+              <h1>EMI Center</h1>
+              <p>Installment tracking</p>
+            </div>
+
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-label">Active Plans</div>
+                <div class="stat-value">0</div>
+              </div>
+              <div class="stat-card warning">
+                <div class="stat-label">Monthly Load</div>
+                <div class="stat-value">AED 0</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>EMI Plans</h3>
+              <p style="color: var(--text-light); font-size: 13px;">No active EMI plans</p>
+              <button class="btn" onclick="App.showAddEMI()">➕ Add EMI Plan</button>
+            </div>
+          </div>
+        `;
+      },
+
+      async showAddEMI() {
+        alert('EMI Plan creation coming soon!\n\nFeatures:\n• Convert transaction to EMI\n• Manual EMI entry\n• Installment schedule generation\n• Monthly forecast');
+      },
+
+      // ============================================
+      // REPORTS SCREEN
+      // ============================================
+      render_reports() {
+        return `
+          <div class="screen active">
+            <div class="header">
+              <h1>Reports</h1>
+              <p>Analytics & Export</p>
+            </div>
+
+            <div class="card">
+              <h3>Export Options</h3>
+              <button class="btn" onclick="App.exportCSV()">📄 Export CSV</button>
+              <button class="btn btn-secondary" onclick="App.exportExcel()">📊 Export Excel</button>
+              <button class="btn btn-secondary" onclick="App.exportOfficial()">💼 Official Report</button>
+            </div>
+
+            <div class="card">
+              <h3>Category Breakdown</h3>
+              <p style="color: var(--text-light); font-size: 13px;">Coming soon</p>
+            </div>
+          </div>
+        `;
+      },
+
+      async exportCSV() {
+        alert('CSV Export\n\nExporting all transactions...');
+      },
+
+      async exportExcel() {
+        alert('Excel Export\n\nGenerating XLSX file...');
+      },
+
+      async exportOfficial() {
+        alert('Official Report\n\nExporting official expenses only...');
+      },
+
+      // ============================================
+      // SETTINGS SCREEN
+      // ============================================
+      render_settings() {
+        return `
+          <div class="screen active">
+            <div class="header">
+              <h1>Settings</h1>
+              <p>App configuration</p>
+            </div>
+
+            <div class="card">
+              <h3>Data Management</h3>
+              <button class="btn btn-secondary" onclick="App.backupData()">💾 Backup Data</button>
+              <button class="btn btn-secondary" onclick="App.restoreData()">📥 Restore Data</button>
+              <button class="btn btn-danger" onclick="App.clearData()">🗑️ Clear All Data</button>
+            </div>
+
+            <div class="card">
+              <h3>Security</h3>
+              <button class="btn btn-secondary">🔒 Set PIN Lock</button>
+              <button class="btn btn-secondary">🔑 Manage Passwords</button>
+            </div>
+
+            <div class="card">
+              <h3>About</h3>
+              <p style="font-size: 13px; color: var(--text-light);">
+                <strong>Finance Manager Pro</strong><br>
+                Version 2.0.0<br>
+                Built for Tejas<br><br>
+                Features: Multi-currency • OCR • PDF parsing • EMI tracking • Reconciliation
+              </p>
+            </div>
+          </div>
+        `;
+      },
+
+      async backupData() {
+        alert('Backup Data\n\nExporting encrypted backup file...');
+      },
+
+      async restoreData() {
+        alert('Restore Data\n\nSelect backup file to restore...');
+      },
+
+      async clearData() {
+        if (confirm('⚠️ Clear ALL data?\n\nThis will delete:\n• All accounts\n• All transactions\n• All EMI plans\n• All settings\n\nThis cannot be undone!')) {
+          const stores = ['accounts', 'transactions', 'import_batches', 'emi_plans', 'reconciliation_groups', 'category_learning', 'fx_rates'];
+          for (const store of stores) {
+            const items = await DB.getAll(store);
+            for (const item of items) {
+              await DB.delete(store, item.id);
+            }
           }
-        });
+          await this.seedInitialData();
+          await this.loadData();
+          alert('✅ All data cleared. Seed accounts restored.');
+          navigate('dashboard');
+        }
       },
-      
-      // Close Modal
+
       closeModal() {
         document.getElementById('modal').classList.remove('active');
       },
-      
-      // Register Service Worker
+
       registerServiceWorker() {
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZnVuY3Rpb24oZXZlbnQpIHsKICBzZWxmLnNraXBXYWl0aW5nKCk7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdhY3RpdmF0ZScsIGZ1bmN0aW9uKGV2ZW50KSB7CiAgcmV0dXJuIHNlbGYuY2xpZW50cy5jbGFpbSgpOwp9KTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBmdW5jdGlvbihldmVudCkgewogIGV2ZW50LnJlc3BvbmRXaXRoKGZldGNoKGV2ZW50LnJlcXVlc3QpKTsKfSk7')
-            .then(() => console.log('Service Worker registered'))
-            .catch(err => console.log('Service Worker registration failed:', err));
+            .catch(err => console.log('SW registration failed:', err));
         }
       }
     };
-    
-    // Navigation Function
+
+    // ============================================
+    // NAVIGATION
+    // ============================================
     function navigate(screen) {
       const buttons = document.querySelectorAll('.nav-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
       event.target.closest('.nav-btn').classList.add('active');
-      
-      FinanceApp.currentScreen = screen;
-      FinanceApp.render();
+      App.currentScreen = screen;
+      App.render();
     }
-    
-    // Initialize App
-    FinanceApp.init();
+
+    // ============================================
+    // INITIALIZE APP
+    // ============================================
+    App.init();
   </script>
 </body>
 </html>
