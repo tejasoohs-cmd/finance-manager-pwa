@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1e40af">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Finance Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;padding-bottom:80px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;box-shadow:0 -2px 10px rgba(0,0,0,.1);z-index:100;padding:8px 0}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:none;background:none;color:#6b7280;padding:8px;cursor:pointer;font-size:11px}
+.nav-btn.active{color:#1e40af;font-weight:600}
+.nav-btn .icon{font-size:24px}
+#content{padding:16px;max-width:768px;margin:0 auto}
+.screen{display:none}
+.screen.active{display:block}
+.header h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.header p{color:#6b7280;font-size:14px;margin-bottom:24px}
+.card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.stat-card{background:linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);color:#fff;padding:20px;border-radius:12px}
+.stat-label{font-size:12px;opacity:.9;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700}
+.btn{background:#1e40af;color:#fff;border:none;padding:16px 24px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-bottom:12px}
+.btn:active{transform:scale(.98);background:#1e3a8a}
+.btn-secondary{background:#6b7280}
+.btn-secondary:active{background:#4b5563}
+.alert{padding:16px;border-radius:12px;margin-bottom:16px;background:#d1fae5;color:#065f46;border:1px solid #10b981;font-size:14px;line-height:1.5}
+.account-item,.transaction-item{background:#fff;padding:16px;border-radius:12px;border:1px solid #e5e7eb;margin-bottom:12px}
+.account-header{display:flex;justify-content:space-between;align-items:center}
+.account-name{font-weight:600;font-size:16px}
+.account-type{font-size:12px;color:#6b7280;margin-top:4px}
+.merchant-name{font-weight:600;font-size:16px}
+.transaction-date{font-size:12px;color:#6b7280;margin-top:4px}
+.amount{font-size:18px;font-weight:700;color:#dc2626}
+.badge{display:inline-block;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef3c7;color:#d97706;margin-top:8px}
+.modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;padding:16px;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-content{background:#fff;border-radius:16px;padding:24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:20px}
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:14px;font-weight:500;margin-bottom:8px}
+.input-group input,.input-group select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:16px}
+.empty-state{text-align:center;padding:48px 24px;color:#6b7280}
+.empty-state .icon{font-size:64px;margin-bottom:16px;opacity:.5}
+.delete-btn{padding:8px 16px;border:none;border-radius:8px;background:#ef4444;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.info-box{background:#f3f4f6;padding:16px;border-radius:12px;margin:16px 0}
+.info-box strong{display:block;margin-bottom:8px}
+.info-item{font-size:12px;color:#6b7280;margin-top:8px;padding-left:8px;border-left:2px solid #d1d5db}
+</style>
+</head>
+<body>
+<div id="app">
+<nav class="nav">
+<button class="nav-btn active" onclick="nav('dashboard')"><span class="icon">📊</span><span>Dashboard</span></button>
+<button class="nav-btn" onclick="nav('accounts')"><span class="icon">💳</span><span>Accounts</span></button>
+<button class="nav-btn" onclick="nav('import')"><span class="icon">⬆️</span><span>Import</span></button>
+<button class="nav-btn" onclick="nav('transactions')"><span class="icon">💰</span><span>Transactions</span></button>
+</nav>
+<main id="content"></main>
+</div>
+<div class="modal" id="modal"></div>
+<script>
+const app={accounts:[],transactions:[],screen:'dashboard',init(){this.load();this.render()},load(){const d=localStorage.getItem('financeData');if(d){const p=JSON.parse(d);this.accounts=p.accounts||[];this.transactions=p.transactions||[]}},save(){localStorage.setItem('financeData',JSON.stringify({accounts:this.accounts,transactions:this.transactions}))},render(){const c=document.getElementById('content');c.innerHTML=this['render_'+this.screen]()},render_dashboard(){const t=this.transactions.reduce((s,x)=>s+Math.abs(x.amount),0);const p=this.transactions.filter(x=>x.type==='Personal').reduce((s,x)=>s+Math.abs(x.amount),0);const o=this.transactions.filter(x=>x.type==='Official').reduce((s,x)=>s+Math.abs(x.amount),0);return`<div class="screen active"><div class="header"><h1>Dashboard</h1><p>${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</p></div><div class="stat-grid"><div class="stat-card"><div class="stat-label">Total Spend</div><div class="stat-value">AED ${t.toFixed(0)}</div></div><div class="stat-card"><div class="stat-label">Accounts</div><div class="stat-value">${this.accounts.length}</div></div></div>${this.transactions.length>0?`<div class="card"><h3 style="margin-bottom:16px">Spending</h3><div style="display:flex;gap:16px"><div style="flex:1"><div style="font-size:12px;color:#6b7280">Personal</div><div style="font-size:24px;font-weight:700;color:#1e40af">AED ${p.toFixed(0)}</div></div><div style="flex:1"><div style="font-size:12px;color:#6b7280">Official</div><div style="font-size:24px;font-weight:700;color:#059669">AED ${o.toFixed(0)}</div></div></div></div>`:`<div class="empty-state"><div class="icon">💰</div><p style="font-size:16px;font-weight:600;margin-bottom:8px">No transactions yet</p><p style="font-size:14px">Go to Import tab!</p></div>`}</div>`},render_accounts(){return`<div class="screen active"><div class="header"><h1>Accounts</h1><p>${this.accounts.length} accounts</p></div><button class="btn" onclick="app.addAcc()">➕ Add Account</button>${this.accounts.length===0?`<div class="empty-state"><div class="icon">💳</div><p>No accounts yet</p></div>`:this.accounts.map((a,i)=>`<div class="account-item"><div class="account-header"><div><div class="account-name">${a.name}</div><div class="account-type">${a.institution} • ${a.type}</div></div><button class="delete-btn" onclick="app.delAcc(${i})">Delete</button></div></div>`).join('')}</div>`},render_import(){return`<div class="screen active"><div class="header"><h1>Smart Import</h1><p>Auto-detects accounts</p></div><div class="card"><div class="alert">🤖 <strong>Auto Account Detection</strong><br>Upload statements - we detect banks automatically!</div><h3 style="margin:20px 0 12px;font-size:16px">Try Demo Imports:</h3><button class="btn" onclick="app.imp('mashreq')">🧪 Import Mashreq Statement</button><button class="btn btn-secondary" onclick="app.imp('tabby')">🧪 Import Tabby Statement</button><button class="btn btn-secondary" onclick="app.imp('adcb')">🧪 Import ADCB Statement</button><button class="btn btn-secondary" onclick="app.imp('enbd')">🧪 Import ENBD Statement</button></div></div>`},render_transactions(){return`<div class="screen active"><div class="header"><h1>Transactions</h1><p>${this.transactions.length} total</p></div>${this.transactions.length===0?`<div class="empty-state"><div class="icon">💰</div><p>No transactions yet</p></div>`:this.transactions.map(t=>{const a=this.accounts.find(x=>x.id===t.accountId);return`<div class="transaction-item"><div style="display:flex;justify-content:space-between;align-items:start"><div style="flex:1"><div class="merchant-name">${t.merchant}</div><div class="transaction-date">${new Date(t.date).toLocaleDateString()} • ${a?.name||'Unknown'}</div>${t.installment?`<div class="badge">${t.installment}</div>`:''}</div><div class="amount">-AED ${t.amount.toFixed(2)}</div></div></div>`}).join('')}</div>`},addAcc(){const m=document.getElementById('modal');m.innerHTML=`<div class="modal-content"><div class="modal-title">Add Account</div><div class="input-group"><label>Name</label><input type="text" id="n" placeholder="e.g., Mashreq Savings"></div><div class="input-group"><label>Institution</label><select id="i"><option>Mashreq</option><option>ADCB</option><option>ENBD</option><option>Tabby</option><option>FAB</option><option>DIB</option></select></div><div class="input-group"><label>Type</label><select id="t"><option value="bank">Bank</option><option value="credit">Credit Card</option><option value="bnpl">BNPL</option></select></div><button class="btn" onclick="app.saveAcc()">Save</button><button class="btn btn-secondary" onclick="app.close()">Cancel</button></div>`;m.classList.add('active')},saveAcc(){this.accounts.push({id:Date.now(),name:document.getElementById('n').value,institution:document.getElementById('i').value,type:document.getElementById('t').value});this.save();this.close();this.screen='accounts';this.render()},delAcc(i){if(confirm('Delete?')){this.accounts.splice(i,1);this.save();this.render()}},imp(type){const data={mashreq:{name:'Mashreq Credit Card ••3456',inst:'Mashreq',type:'credit',conf:94,txns:[{merchant:'Mall of the Emirates',amount:875.00},{merchant:'EPPCO Petrol Station',amount:180.00},{merchant:'Spinneys Supermarket',amount:320.50},{merchant:'Starbucks Dubai',amount:42.00}]},tabby:{name:'Tabby BNPL',inst:'Tabby',type:'bnpl',conf:95,txns:[{merchant:'Amazon.ae',amount:150,installment:'1 of 4'},{merchant:'Noon.com',amount:200,installment:'2 of 3'},{merchant:'Shein',amount:75,installment:'3 of 4'}]},adcb:{name:'ADCB Credit Card ••4567',inst:'ADCB',type:'credit',conf:92,txns:[{merchant:'Carrefour Dubai Mall',amount:450.50},{merchant:'Emirates Petrol',amount:200},{merchant:'Netflix',amount:39}]},enbd:{name:'ENBD Credit Card ••8901',inst:'ENBD',type:'credit',conf:88,txns:[{merchant:'Dubai Mall Shopping',amount:1250},{merchant:'Careem Ride',amount:45},{merchant:'Zomato',amount:85.50}]}}[type];const m=document.getElementById('modal');m.innerHTML=`<div class="modal-content"><div class="modal-title">✅ Account Detected</div><div class="alert">Detected with <strong>${data.conf}% confidence</strong></div><div class="input-group"><label>Institution</label><input type="text" value="${data.inst}" readonly style="background:#f3f4f6"></div><div class="input-group"><label>Name</label><input type="text" id="dn" value="${data.name}"></div><div class="input-group"><label>Type</label><select id="dt"><option value="bank" ${data.type==='bank'?'selected':''}>Bank</option><option value="credit" ${data.type==='credit'?'selected':''}>Credit Card</option><option value="bnpl" ${data.type==='bnpl'?'selected':''}>BNPL</option></select></div><div class="info-box"><strong>Found ${data.txns.length} transactions:</strong>${data.txns.map(t=>`<div class="info-item">${t.merchant} - AED ${t.amount.toFixed(2)} ${t.installment||''}</div>`).join('')}</div><button class="btn" onclick="app.confirm('${type}')">Create Account & Import</button><button class="btn btn-secondary" onclick="app.close()">Cancel</button></div>`;m.classList.add('active')},confirm(type){const data={mashreq:{name:'Mashreq Credit Card ••3456',inst:'Mashreq',type:'credit',txns:[{merchant:'Mall of the Emirates',amount:875.00},{merchant:'EPPCO Petrol Station',amount:180.00},{merchant:'Spinneys Supermarket',amount:320.50},{merchant:'Starbucks Dubai',amount:42.00}]},tabby:{name:'Tabby BNPL',inst:'Tabby',type:'bnpl',txns:[{merchant:'Amazon.ae',amount:150,installment:'1 of 4'},{merchant:'Noon.com',amount:200,installment:'2 of 3'},{merchant:'Shein',amount:75,installment:'3 of 4'}]},adcb:{name:'ADCB Credit Card ••4567',inst:'ADCB',type:'credit',txns:[{merchant:'Carrefour Dubai Mall',amount:450.50},{merchant:'Emirates Petrol',amount:200},{merchant:'Netflix',amount:39}]},enbd:{name:'ENBD Credit Card ••8901',inst:'ENBD',type:'credit',txns:[{merchant:'Dubai Mall Shopping',amount:1250},{merchant:'Careem Ride',amount:45},{merchant:'Zomato',amount:85.50}]}}[type];const aid=Date.now();this.accounts.push({id:aid,name:document.getElementById('dn').value,institution:data.inst,type:document.getElementById('dt').value});data.txns.forEach(t=>{this.transactions.push({...t,accountId:aid,date:Date.now()-Math.random()*604800000,type:'Unknown',id:Date.now()+Math.random()})});this.save();this.close();alert(`✅ Success!\n\nAccount: ${data.name}\nTransactions: ${data.txns.length}`);this.screen='dashboard';this.render()},close(){document.getElementById('modal').classList.remove('active')}};
+function nav(s){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));event.target.closest('.nav-btn').classList.add('active');app.screen=s;app.render()}
+app.init();
+</script>
+</body>
+</html>
